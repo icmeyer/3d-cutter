@@ -449,7 +449,28 @@ class Cutter3D {
     }
 
 public:
-    static TetMesh<T> run(const TetMesh<T>& tetMesh, const TriMesh<T>& triMesh) {
+    TetMesh<T> tetMesh;
+    TriMesh<T> triMesh;
+    TetMesh<T> result;
+
+    vector<array<T, 3>> *outNodes;
+    vector<array<int, 4>> *outVoxels;
+    vector<int> *outIDs;
+
+    Cutter3D<T>(TetMesh<T> tetMesh, TriMesh<T> triMesh): tetMesh(tetMesh), triMesh(triMesh) {}
+    Cutter3D<T>(vector<array<T,3>> volumeNodes, vector<array<int,4>> volumeVoxels,
+                vector<array<T,3>> surfNodes,  vector<array<int,3>> surfFaces) {
+        tetMesh.nodes_ = volumeNodes;
+        tetMesh.mesh_ = volumeVoxels;
+        tetMesh.initializeSurfaceMesh();
+        tetMesh.computeConnectedComponents();
+
+        triMesh.nodes_ = surfNodes;
+        triMesh.mesh_ = surfFaces;
+    }
+
+    // static TetMesh<T> run(const TetMesh<T>& tetMesh, const TriMesh<T>& triMesh) {
+    TetMesh<T> run() {
         TetBoundary2TetIds tetBoundary2TetIds;
         auto intersections = computeIntersections(tetMesh, triMesh, tetBoundary2TetIds);
         cout << "finished computing " << intersections.size() << " intersections\n";
@@ -467,7 +488,33 @@ public:
         vector<I4> newMesh;
         merge(cutElements, tetMesh, newNodes, newMesh, intersections);
         cout << "finished split-merge\n";
+
         return subdivide(cutElements, tetMesh, newNodes, newMesh, intersections);
+    }
+
+    void runPlainOut() {
+        TetBoundary2TetIds tetBoundary2TetIds;
+        auto intersections = computeIntersections(tetMesh, triMesh, tetBoundary2TetIds);
+        cout << "finished computing " << intersections.size() << " intersections\n";
+//        for (auto& a: intersections) {
+//            print<int,4>(a.first);
+//            print<T,4>(a.second);
+//        }
+        set<int> cutTets;
+        vector<CutElement> cutElements = split(tetMesh, intersections, tetBoundary2TetIds, cutTets);
+//        for (auto& ce: cutElements) {
+//            cout << ce.parentElementIndex << endl;
+//            print<bool,4>(ce.subElements);
+//        }
+        vector<T3> newNodes;
+        vector<I4> newMesh;
+        merge(cutElements, tetMesh, newNodes, newMesh, intersections);
+        cout << "finished split-merge\n";
+
+        result = subdivide(cutElements, tetMesh, newNodes, newMesh, intersections);
+        outNodes = &result.nodes_;
+        outVoxels = &result.mesh_;
+        outIDs = &result.connectedComponents_;
     }
 };
 
