@@ -17,7 +17,7 @@
 #include <stack>
 #include <map>
 #include <numeric>
-#include <math>
+#include <math.h>
 
 
 // Datastructures start
