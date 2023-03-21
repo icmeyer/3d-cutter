@@ -1,7 +1,7 @@
 //
 //  Copyright (c) 2018 Yuting Wang. All rights reserved.
 //
-
+#define GL_SILENCE_DEPRECATION
 #ifdef __APPLE__//Mac OS
 //#  include <GL/glew.h>
 #  include <OpenGL/OpenGL.h>
@@ -18,11 +18,11 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
-#include "Cutting.h"
 #include <algorithm>
 #include <map>
 #include <fstream>
 #include <sstream>
+#include "Cutting.h"
 using namespace std;
 
 #define d 3
@@ -88,8 +88,8 @@ void simpleTet1() {
     triMesh.mesh_.push_back(I3{0,1,2});
     triMesh.mesh_.push_back(I3{2,3,1});
     
-    Cutter3D<T> cutter;
-    tetMesh = cutter.run(tetMesh, triMesh);
+    Cutter3D<T> cutter(tetMesh, triMesh);
+    tetMesh = cutter.run();
 }
 
 void loadTriMesh(const string& filename) {
@@ -278,7 +278,8 @@ void mouse(int button, int state, int x, int y) {
             if (triMesh.mesh_.size()==0) {
                 return;
             }
-            tetMesh = Cutter3D<T>::run(tetMesh, triMesh);
+            Cutter3D<T> cutter(tetMesh, triMesh);
+            tetMesh = cutter.run();
             glutPostRedisplay();
         }
     }
@@ -370,24 +371,52 @@ void reshape(GLint newWidth,GLint newHeight) {
 }
 
 int main(int argc, char **argv) {
-    meshCutGrid();
-    
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA | GLUT_ALPHA);
-    glutInitWindowSize(windowWidth, windowHeight);
-    string window_name="cutting";
-    glutCreateWindow(window_name.c_str());
-    glClearColor(0.0,0.0,0.0,1.0);
-    glEnable(GL_DEPTH_TEST);
-    
-    //glutSpecialFunc(Special_Key);
-    glutKeyboardFunc(key);
-    glutMouseFunc(mouse);
-    glutMotionFunc(motion);
-    glutDisplayFunc(render);
-    glutReshapeFunc(reshape);
-    
-    glutMainLoop();
-    
+    if (argc==1){
+        meshCutGrid();
+        glutInit(&argc, argv);
+        glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA | GLUT_ALPHA);
+        glutInitWindowSize(windowWidth, windowHeight);
+        string window_name="cutting";
+        glutCreateWindow(window_name.c_str());
+        glClearColor(0.0,0.0,0.0,1.0);
+        glEnable(GL_DEPTH_TEST);
+        
+        //glutSpecialFunc(Special_Key);
+        glutKeyboardFunc(key);
+        glutMouseFunc(mouse);
+        glutMotionFunc(motion);
+        glutDisplayFunc(render);
+        glutReshapeFunc(reshape);
+        
+        glutMainLoop();
+    }
+    if (argc==2){
+        meshCutGrid();
+        simpleTet1();
+    }
+    else if (argc==5){
+        std::string tetNodes = argv[1];
+        std::string tetTets = argv[2];
+        std::string surfNodes = argv[3];
+        std::string surfTris = argv[4];
+        std::cout << "Running 3dcutter with: \n" 
+                  << "Volume nodes:      " << tetNodes << "\n"
+                  << "Volume tetrahedra: " << tetTets << "\n"
+                  << "Surf nodes:        " << surfNodes << "\n"
+                  << "Surf triangles:    " << surfTris << "\n";
+        std::vector<std::array<double, 3>> tetcoords = loadCoords(tetNodes);
+        std::vector<std::array<int, 4>> tetidxs = loadTets(tetTets);
+        std::vector<std::array<double, 3>> tricoords = loadCoords(surfNodes);
+        std::vector<std::array<int, 3>> triidxs = loadTris(surfTris);
+        Cutter3D<double> cutter(tetcoords, tetidxs, tricoords, triidxs);
+        cutter.runPlainOut();
+        std::string nodeout = "nodes.out";
+        writeCoords(*cutter.outNodes, nodeout);
+        std::string voxelsout = "voxels.out";
+        writeTets(*cutter.outVoxels, voxelsout);
+        std::string IDsout = "IDs.out";
+        writeIDs(*cutter.outIDs, IDsout);
+    }
+
     return 0;
 }

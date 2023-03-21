@@ -4,13 +4,14 @@ project(
   VERSION 0.1
   LANGUAGES CXX)
 set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_FLAGS "-L/System/Library/Frameworks -framework GLUT -framework OpenGL")
 
-add_library(cutter3d STATIC src/Cutting.cpp)
+add_executable(cutter3d src/main.cpp)
+# add_library(libcutter3d STATIC src/Cutting.h src/Cutting.cpp)
+# target_link_libraries(cutter3d PRIVATE libcutter3d)
 
-add_executable(cutter3d_exec src/Cutting.cpp)
-
-INSTALL(TARGETS cutter3d
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    )
-INSTALL(FILES src/Cutting.h DESTINATION include)
+# INSTALL(TARGETS cutter3d
+#     LIBRARY DESTINATION lib
+#     ARCHIVE DESTINATION lib
+#     )
+# INSTALL(FILES src/Cutting.h DESTINATION include)

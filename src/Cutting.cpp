@@ -4,11 +4,11 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
-#include "Cutting.h"
 #include <algorithm>
 #include <map>
 #include <fstream>
 #include <sstream>
+#include "Cutting.h"
 
 
 using namespace std;
@@ -92,7 +92,6 @@ void simpleTet1() {
     for (int &v: *cutter.outIDs){
         cout << v << endl;
     }
-      
 }
 
 void loadTriMesh(const string& filename) {
@@ -177,24 +176,4 @@ void meshCutGrid() {
 //    loadTriMesh("/Users/yutingwang/Downloads/beethoven.ply");
 //    Cutter3D<T> cutter;
 //    tetMesh = cutter.run(tetMesh, triMesh);
-}
-
-
-int main(int argc, char **argv) {
-    if (argc==1){
-        meshCutGrid();
-        simpleTet1();
-    }
-    else if (argc==5){
-        std::string tetNodes = argv[1];
-        std::string tetTets = argv[2];
-        std::string surfNodes = argv[3];
-        std::string surfTris = argv[4];
-        std::cout << "Running 3dcutter with: \n" 
-                  << "Volume nodes:      " << tetNodes << "\n"
-                  << "Volume tetrahedra: " << tetTets << "\n"
-                  << "Surf nodes:        " << surfNodes << "\n"
-                  << "Surf triangles:    " << surfTris << "\n";
-    }
-    return 0;
 }

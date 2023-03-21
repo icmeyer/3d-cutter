@@ -1012,8 +1012,12 @@ public:
                 std::vector<std::array<T,3>> surfNodes,  std::vector<std::array<int,3>> surfFaces) {
         tetMesh.nodes_ = volumeNodes;
         tetMesh.mesh_ = volumeVoxels;
+        std::cout << "initializing mesh - ";
         tetMesh.initializeSurfaceMesh();
+        std::cout << "done" << std::endl;
+        std::cout << "computing connected components - ";
         tetMesh.computeConnectedComponents();
+        std::cout << "done" << std::endl;
 
         triMesh.nodes_ = surfNodes;
         triMesh.mesh_ = surfFaces;
@@ -1067,5 +1071,77 @@ public:
         outIDs = &result.connectedComponents_;
     }
 };
+
+std::vector<std::array<double,3>> loadCoords(std::string& filename) {
+    std::vector<std::array<double,3>> result;
+    std::ifstream fs(filename);
+    std::string line;
+    while(getline(fs, line)) {
+        std::stringstream ss(line);
+        double t1,t2,t3;
+        ss >> t1 >> t2 >> t3;
+        // std::cout << "Loading nodes: " << t1 << " " << t2 << " " << t3 << std::endl;
+        result.push_back({t1,t2,t3});
+    }
+    return result;
+}
+
+std::vector<std::array<int,4>> loadTets(std::string& filename) {
+    std::vector<std::array<int,4>> result;
+    std::ifstream fs(filename);
+    std::string line;
+    while(getline(fs, line)) {
+        std::stringstream ss(line);
+        int t1,t2,t3,t4;
+        ss >> t1 >> t2 >> t3 >> t4;
+        // std::cout << "Loading tets: " << t1 << " " << t2 << " " << t3 << " " << t4 << std::endl;
+        result.push_back({t1,t2,t3,t4});
+    }
+    return result;
+}
+
+std::vector<std::array<int,3>> loadTris(std::string& filename) {
+    std::vector<std::array<int,3>> result;
+    std::ifstream fs(filename);
+    std::string line;
+    while(getline(fs, line)) {
+        std::stringstream ss(line);
+        int t1,t2,t3;
+        ss >> t1 >> t2 >> t3;
+        // std::cout << "Loading tris: " << t1 << " " << t2 << " " << t3 << std::endl;
+        result.push_back({t1,t2,t3});
+    }
+    return result;
+}
+
+void writeCoords(std::vector<std::array<double,3>> coords, std::string& filename) {
+    std::ofstream myFile(filename);
+    for(auto& row: coords){
+        for (int i=0; i<3; i++){
+            myFile << row[i] << " ";
+        }
+        myFile << "\n";
+    }
+    myFile.close();
+}
+
+void writeTets(std::vector<std::array<int,4>> tets, std::string& filename) {
+    std::ofstream myFile(filename);
+    for(auto& row: tets){
+        for (int i=0; i<4; i++){
+            myFile << row[i] << " ";
+        }
+        myFile << "\n";
+    }
+    myFile.close();
+}
+
+void writeIDs(std::vector<int> IDs, std::string& filename) {
+    std::ofstream myFile(filename);
+    for(auto& ID: IDs){
+        myFile << ID << "\n";
+    }
+    myFile.close();
+}
 
 #endif /* Cutting_h */
