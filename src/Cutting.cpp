@@ -181,7 +181,20 @@ void meshCutGrid() {
 
 
 int main(int argc, char **argv) {
-    meshCutGrid();
-    simpleTet1();
+    if (argc==1){
+        meshCutGrid();
+        simpleTet1();
+    }
+    else if (argc==5){
+        std::string tetNodes = argv[1];
+        std::string tetTets = argv[2];
+        std::string surfNodes = argv[3];
+        std::string surfTris = argv[4];
+        std::cout << "Running 3dcutter with: \n" 
+                  << "Volume nodes:      " << tetNodes << "\n"
+                  << "Volume tetrahedra: " << tetTets << "\n"
+                  << "Surf nodes:        " << surfNodes << "\n"
+                  << "Surf triangles:    " << surfTris << "\n";
+    }
     return 0;
 }
